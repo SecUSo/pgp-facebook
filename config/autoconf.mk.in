@@ -1,0 +1,27 @@
+# @configure_input@
+
+CC = @CC@
+PERL = @PERL@
+PYTHON = @PYTHON@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+
+OS_TARGET = @BUILD_OS_ARCH@
+CPU_ARCH = @BUILD_TARGET_CPU@
+
+DLL_PREFIX = @DLL_PREFIX@
+DLL_SUFFIX = @DLL_SUFFIX@
+
+TB_PATH = "@TB_PATH@"
+TB_ARGS = @TB_ARGS@
+
+TESTS = @enable_tests@
+FIX_LANGUAGES = @enable_fix_lang@
+ENABLE_LANG = @enable_lang@
+
+srcdir = @srcdir@
+
+DIST = $(DEPTH)/build/dist
+BUILD = $(DEPTH)/build
+
+JSUNIT = $(DEPTH)/util/run-jsunit $(PERL) $(TB_PATH) $(TB_ARGS) -jsunit

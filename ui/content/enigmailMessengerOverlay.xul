@@ -1,0 +1,434 @@
+<?xml version="1.0"?>
+
+<!--
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public
+ * License Version 1.1 (the "MPL"); you may not use this file
+ * except in compliance with the MPL. You may obtain a copy of
+ * the MPL at http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the MPL is distributed on an "AS
+ * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ * implied. See the MPL for the specific language governing
+ * rights and limitations under the MPL.
+ *
+ * The Original Code is Enigmail.
+ *
+ * The Initial Developer of the Original Code is Ramalingam Saravanan.
+ * Portions created by Ramalingam Saravanan <svn@xmlterm.org> are
+ * Copyright (C) 2001 Ramalingam Saravanan. All Rights Reserved.
+ *
+ * Contributor(s):
+ * Patrick Brunschwig <patrick@enigmail.net>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ * ***** END LICENSE BLOCK ***** *
+-->
+
+<!--
+  This is the overlay that adds a menu and some PGP buttons
+  to messenger mail reading window
+-->
+
+<?xml-stylesheet href="chrome://enigmail/skin/enigmail.css"
+                 type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://enigmail/locale/enigmail.dtd" >
+
+<overlay id="enigmailMessengerOverlay"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <script type="application/x-javascript"  src="chrome://enigmail/content/enigmailMessengerOverlay.js"/>
+
+  <commandset id="mailToolbarItems">
+    <command id="button_enigmail_decrypt"/>
+  </commandset>
+
+  <broadcasterset>
+    <broadcaster id="enigmailBcDisplayClass" class="headerValue"/>
+  </broadcasterset>
+
+  <!-- Menu insert point for Thunderbird & SeaMonkey -->
+  <menubar id="mail-menubar">
+    <menu id="menu_Enigmail"
+          label="&enigmail.label;"
+          accesskey="&enigmail.messengermenu.accesskey;"
+          insertbefore="tasksMenu" />
+  </menubar>
+
+  <!-- Menu insert point for Spicebird -->
+  <menubar id="framework-menubar">
+    <menu id="menu_Enigmail"
+          label="&enigmail.label;"
+          accesskey="&enigmail.messengermenu.accesskey;"
+          insertafter="messageMenu,go-menu,view-menu" insertbefore="tools-menu"
+          app="mailnews"/>
+  </menubar>
+
+  <!-- Thunderbird secondary pane -->
+  <popup id="appmenuSecondaryPane">
+        <splitmenu id="menu_Enigmail2ndPane"
+          label="&enigmail.label;"
+          accesskey="&enigmail.messengermenu.accesskey;"
+          insertafter="appmenu_customize">
+        <menupopup id="enigmail_2ndPanePopup" onpopupshowing="Enigmail.msg.displayMainMenu(this)"/>
+    </splitmenu>
+  </popup>
+
+  <!-- Menu content for all apps -->
+  <menu id="menu_Enigmail">
+
+    <menupopup id="menu_EnigmailPopup"
+      onpopupshowing="EnigmailFuncs.collapseAdvanced(this, 'hidden', Enigmail.msg.updateOptionsDisplay());">
+
+      <menuitem id="enigmail_wizard_basic"
+           label="&enigmail.setupWiz.label;"
+           advanced="reverse"
+           accesskey="&enigmail.setupWiz.accesskey;"
+           oncommand="EnigmailFuncs.openSetupWizard(window, true);" />
+
+      <menuitem id="enigmail_decryptverify"
+           label="&enigmail.decryptverify.label;"
+           accesskey="&enigmail.decryptverify.accesskey;"
+           advanced="true"
+           hidden="false"
+           oncommand="Enigmail.msg.messageDecrypt();" />
+
+      <menuseparator
+           advanced="true"
+           hidden="false"/>
+
+      <menuitem id="enigmail_autoDecrypt"
+           type="checkbox"
+           checked="false"
+           advanced="true"
+           hidden="false"
+           label="&enigmail.autoDecrypt.label;"
+           accesskey="&enigmail.autoDecrypt.accesskey;"
+           oncommand="Enigmail.msg.toggleAttribute('autoDecrypt');" />
+
+      <menuseparator
+           advanced="true"
+           hidden="false"/>
+
+      <menuitem id="enigmail_clearPassphrase"
+           label="&enigmail.clearPassphrase.label;"
+           accesskey="&enigmail.clearPassphrase.accesskey;"
+           advanced="true"
+           hidden="false"
+           oncommand="EnigmailCommon.clearPassphrase(window);" />
+
+      <menuitem id="enigmail_reload_msg"
+           label="&enigmail.reload.label;"
+           accesskey="&enigmail.reload.accesskey;"
+           advanced="true"
+           hidden="false"
+           oncommand="Enigmail.msg.reloadCompleteMsg();" />
+
+      <menu id="enigmail_sendersKeyMenu"
+           label="&enigmail.sendersKeyMenu.label;"
+           advanced="true"
+           hidden="false"
+           accesskey="&enigmail.sendersKeyMenu.accesskey;">
+
+        <menupopup onpopupshowing="Enigmail.hdrView.updateSendersKeyMenu();">
+
+          <menuitem id="enigmail_importpublickey"
+               label="&enigmail.importpublickey.label;"
+               accesskey="&enigmail.importpublickey.accesskey;"
+               disabled="true"
+               oncommand="Enigmail.msg.messageImport();" />
+
+          <menuseparator/>
+
+          <menuitem label="&enigmail.displayKeyProperties.label;"
+                    id="enigmail_keyMgmtDispKeyDetails"
+                    oncommand="Enigmail.hdrView.dispKeyDetails();"/>
+          <menuitem label="&enigmail.signSenderKey.label;"
+                    id="enigmail_keyMgmtSignKey"
+                    oncommand="Enigmail.hdrView.signKey();"/>
+          <menuitem label="&enigmail.trustSenderKey.label;"
+                    id="enigmail_keyMgmtKeyTrust"
+                    oncommand="Enigmail.hdrView.editKeyTrust();"/>
+          <menuitem label="&enigmail.showPhoto.label;"
+                    id="enigmail_keyMgmtShowPhoto"
+                    oncommand="Enigmail.hdrView.showPhoto();"/>
+        </menupopup>
+      </menu>
+
+      <menuseparator/>
+
+      <menuitem id="enigmail_keymgmt"
+           label="&enigmail.keyManWindow.label;"
+           accesskey="&enigmail.keyManWindow.accesskey;"
+           oncommand="EnigmailFuncs.openKeyManager(window);" />
+
+      <menuitem label="&enigmail.adminSmartCard.label;"
+              id="enigmail_smartCard"
+              accesskey="&enigmail.adminSmartCard.accesskey;"
+              advanced="true"
+              hidden="false"
+              oncommand="EnigmailFuncs.openCardDetails();"/>
+
+      <menuitem id="enigmail_RulesEditor"
+          label="&enigmail.editRules.label;"
+          accesskey="&enigmail.editRules.accesskey;"
+          oncommand="EnigmailFuncs.openRulesEditor();"/>
+
+      <menuseparator/>
+
+      <menuitem id="enigmail_prefs"
+           label="&enigmail.prefs.label;"
+           accesskey="&enigmail.prefs.accesskey;"
+           oncommand="EnigmailFuncs.openPrefWindow(window, true, null);" />
+
+      <menuitem id="enigmail_help"
+           label="&enigmail.help.label;"
+           accesskey="&enigmail.help.accesskey;"
+           oncommand="EnigmailFuncs.openHelpWindow('messenger');" />
+
+      <menu id="enigmail_debugMenu"
+           label="&enigmail.debugMenu.label;"
+           advanced="true"
+           hidden="false"
+           accesskey="&enigmail.debugMenu.accesskey;">
+
+        <menupopup>
+          <menuitem id="enigmail_console"
+               label="&enigmail.viewconsole.label;"
+               accesskey="&enigmail.viewconsole.accesskey;"
+               oncommand="EnigmailFuncs.openConsoleWindow();" />
+
+          <menuitem id="enigmail_debug_log"
+               label="&enigmail.viewlog.label;"
+               accesskey="&enigmail.viewlog.accesskey;"
+               oncommand="EnigmailFuncs.openDebugLog(window);" />
+        </menupopup>
+      </menu>
+
+      <menuitem id="enigmail_wizard_advanced"
+           label="&enigmail.setupWiz.label;"
+           advanced="true"
+           accesskey="&enigmail.setupWiz.accesskey;"
+           oncommand="EnigmailFuncs.openSetupWizard(window, true);" />
+
+      <menuitem id="enigmail_about"
+           label="&enigmail.about.label;"
+           accesskey="&enigmail.about.accesskey;"
+           oncommand="EnigmailFuncs.openAboutWindow();" />
+
+    </menupopup>
+  </menu>
+
+<!-- Thunderbird & SeaMonkey 2.x -->
+   <toolbarpalette id="MailToolbarPalette">
+      <toolbarbutton class="toolbarbutton-1"
+              id="button-enigmail-decrypt"
+              label="&enigmail.decryptbutton.label;"
+              tooltiptext="&enigmail.decryptbutton.tip;"
+              oncommand="Enigmail.msg.messageDecrypt();"
+              buttontype="thunderbird"
+              observes="button_enigmail_decrypt"
+              insertafter="button-newmsg"
+              />
+  </toolbarpalette>
+
+<!-- Spicebird -->
+   <toolbarpalette id="framework-toolpalette">
+      <toolbarbutton class="framework-toolbarbutton padded-toolbarbutton"
+              id="button-enigmail-decrypt"
+              label="&enigmail.decryptbutton.label;"
+              tooltiptext="&enigmail.decryptbutton.tip;"
+              oncommand="Enigmail.msg.messageDecrypt();"
+              buttontype="thunderbird"
+              observes="button_enigmail_decrypt"
+              insertafter="button-newmsg"
+              app="mailnews"
+              />
+  </toolbarpalette>
+
+  <!-- the default set does not include the Enigmail decryption icon anymore -->
+
+  <!-- enigmailHdrBox is defined in messengerOverlay-(tbird|sm).xul -->
+
+  <vbox id="enigmailHdrBox">
+    <hbox id="enigmailBox"
+          class="expandedEnigmailBox"
+          collapsed="true" align="center">
+
+      <vbox>
+        <spacer class="enigmailHeaderSpacer"/>
+      </vbox>
+
+      <hbox class="headerNameBox" align="start" id="enigmailStatusTextBox" pack="start">
+        <image id="enigToggleHeaderView2"
+               class="enigmailExpandViewButton" onclick="Enigmail.hdrView.toggleHeaderView();"
+               state="false" persist="state class"/>
+        <spacer flex="1"/>
+        <label class="enigmailHeaderName"
+              id="enigmailStatusHdr" flex="1"
+              value="&enigmail.label;" control="enigmailStatusText"/>
+      </hbox>
+
+      <hbox flex="1" pack="start" class="headerValueBox">
+        <vbox flex="1" pack="start">
+          <hbox flex="1" align="center">
+            <label flex="1" readonly="true"
+                 id="enigmailStatusText" chromedir="ltr"
+                 class="enigmailHeaderValue">...
+            </label>
+          </hbox>
+          <textbox flex="1" readonly="true"
+                 id="expandedEnigmailStatusText"
+                 class="enigmailHeaderValue"
+                 observes="enigmailStatusText"
+                 chromedir="ltr"
+                 collapsed="true" display="false" state="false"
+                 persist="display" aria-labelledby="enigmailStatusHdr"/>
+        </vbox>
+        <vbox flex="0" pack="center">
+          <button id="enigmail_importKey" pack="center"
+                  label="&enigmail.importKey.label;"
+                  hidden="true"
+                  class="enigMsgHdrView-flat-button"
+                  oncommand="Enigmail.msg.handleUnknownKey();"/>
+        </vbox>
+        <vbox class="enigmailHeaderNameBox" flex="0" pack="center">
+          <observes element="enigmailStatusText" attribute="class"/>
+          <button id="enigmailStatusHdrDetails" pack="center"
+                  label="&enigmail.detailsHdrButton.label;"
+                  type="menu"
+                  class="enigMsgHdrView-flat-button">
+            <menupopup id="enigSecurityContext"
+                   onpopupshowing="Enigmail.hdrView.dispSecurityContext();">
+              <menuitem label="&enigmail.importpublickey.label;"
+                        id="enigmail_importKeyunused"
+                        hidden="true"
+                        oncommand="Enigmail.msg.handleUnknownKey();"/>
+              <menuitem label="&enigmail.reload.label;"
+                        id="enigmail_reloadMessage"
+                        disabled="true"
+                        oncommand="Enigmail.msg.reloadCompleteMsg();"/>
+              <menuitem label="&enigmail.pgpSecurityInfo.label;"
+                        id="enigmail_pgpSecurityInfo"
+                        oncommand="Enigmail.msg.viewOpenpgpInfo(null, false);"/>
+              <menuitem label="&enigmail.copySecurityInfo.label;"
+                        id="enigmail_copySecurityInfo"
+                        oncommand="Enigmail.hdrView.copyStatusInfo();"/>
+              <menuseparator/>
+              <menuitem label="&enigmail.displayKeyProperties.label;"
+                        id="enigmail_dispKeyDetails"
+                        oncommand="Enigmail.hdrView.dispKeyDetails();"/>
+              <menuitem label="&enigmail.showPhoto.label;"
+                        id="enigmail_showPhoto"
+                        oncommand="Enigmail.hdrView.showPhoto();"/>
+              <menuitem label="&enigmail.signSenderKeyPopup.label;"
+                        id="enigmail_signSenderKey"
+                        oncommand="Enigmail.hdrView.signKey();"/>
+              <menuitem label="&enigmail.trustSenderKeyPopup.label;"
+                        id="enigmail_editSenderKeyTrust"
+                        oncommand="Enigmail.hdrView.editKeyTrust();"/>
+            </menupopup>
+          </button>
+        </vbox>
+      </hbox>
+    </hbox>
+
+    <hbox id="enigmailRevealAttachments" hidden="true" class="enigmailHeaderNameBox enigmailHeaderBoxLabelSignatureUnknown" flex="0" pack="center">
+      <vbox flex="1" pack="start">
+        <textbox flex="1" readonly="true" align="center" class="enigmailHeaderValue" chromedir="ltr"
+          value="&enigmail.revealAttachmentsButton.label;"/>
+      </vbox>
+      <button class="enigMsgHdrView-flat-button"
+              label="&enigmail.revealAttachments.button;"
+              oncommand="Enigmail.msg.revealAttachments();"/>
+    </hbox>
+
+    <vbox id="enigmailBrokenExchangeBox"
+        flex="0" class="enigmailHeaderNameBox enigmailHeaderBoxLabelSignatureUnknown"
+        collapsed="true"
+        pack="center">
+      <hbox pack="center">
+        <vbox flex="1" pack="start">
+          <description class="enigmailHeaderValue">&enigmail.exchangeGarbage.desc;</description>
+        </vbox>
+        <vbox flex="0" pack="center">
+          <button id="enigmailFixBrokenMessageButton"
+                class="enigMsgHdrView-flat-button"
+                label="&enigmail.exchangeGarbage.fixButton.label;"
+                oncommand="Enigmail.msg.fixBuggyExchangeMail()"/>
+          <label id="enigmailFixBrokenMessageProgress" value="&enigmail.exchangeGarbage.waitMessage;" collapsed="true"/>
+        </vbox>
+      </hbox>
+    </vbox>
+  </vbox>
+
+
+  <!-- Thunderbird -->
+  <popup id="attachmentItemContext" onpopupshowing="return Enigmail.hdrView.enigOnShowAttachmentContextMenu();">
+    <menuseparator/>
+    <menuitem id="enigmail_ctxImportKey"
+      label="&enigmail.ctxImportKey.label;"
+      accesskey="&enigmail.ctxImportKey.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('importKey');"/>
+    <menuitem id="enigmail_ctxDecryptOpen"
+      label="&enigmail.ctxDecryptOpen.label;"
+      accesskey="&enigmail.ctxDecryptOpen.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('openAttachment');"/>
+    <menuitem id="enigmail_ctxDecryptSave"
+      label="&enigmail.ctxDecryptSave.label;"
+      accesskey="&enigmail.ctxDecryptSave.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('saveAttachment');"/>
+    <menuitem id="enigmail_ctxVerifyAtt"
+      label="&enigmail.ctxVerifyAtt.label;"
+      accesskey="&enigmail.ctxVerifyAtt.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('verifySig');"/>
+  </popup>
+
+  <!-- SeaMonkey -->
+  <popup id="attachmentListContext">
+    <menuseparator/>
+    <menuitem id="enigmail_ctxImportKey_SM"
+      label="&enigmail.ctxImportKey.label;"
+      accesskey="&enigmail.ctxImportKey.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('importKey');"/>
+    <menuitem id="enigmail_ctxDecryptOpen_SM"
+      label="&enigmail.ctxDecryptOpen.label;"
+      accesskey="&enigmail.ctxDecryptOpen.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('openAttachment');"/>
+    <menuitem id="enigmail_ctxDecryptSave_SM"
+      label="&enigmail.ctxDecryptSave.label;"
+      accesskey="&enigmail.ctxDecryptSave.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('saveAttachment');"/>
+    <menuitem id="enigmail_ctxVerifyAtt_SM"
+      label="&enigmail.ctxVerifyAtt.label;"
+      accesskey="&enigmail.ctxVerifyAtt.accesskey;"
+      oncommand="Enigmail.msg.handleAttachmentSel('verifySig');"/>
+  </popup>
+
+  <statusbar id="status-bar">
+    <hbox id="enigmail-status-bar"
+          insertafter="totalMessageCount"
+          app="mailnews">
+      <statusbarpanel id="enigmail-encrypted-status"
+        class="statusbarpanel-iconic"
+        collapsed="true"/>
+      <statusbarpanel id="enigmail-signed-status"
+        class="statusbarpanel-iconic"
+        collapsed="true"/>
+    </hbox>
+  </statusbar>
+</overlay>

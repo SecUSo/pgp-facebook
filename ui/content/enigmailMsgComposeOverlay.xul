@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<!--
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public
+ * License Version 1.1 (the "MPL"); you may not use this file
+ * except in compliance with the MPL. You may obtain a copy of
+ * the MPL at http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the MPL is distributed on an "AS
+ * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ * implied. See the MPL for the specific language governing
+ * rights and limitations under the MPL.
+ *
+ * The Original Code is Enigmail.
+ *
+ * The Initial Developer of the Original Code is Ramalingam Saravanan.
+ * Portions created by Ramalingam Saravanan <svn@xmlterm.org> are
+ * Copyright (C) 2001 Ramalingam Saravanan. All Rights Reserved.
+ *
+ * Contributor(s):
+ * Patrick Brunschwig <patrick@enigmail.net>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ * ***** END LICENSE BLOCK ***** *
+-->
+
+<!--
+  This is the overlay that adds a menu and PGP buttons to the
+  messenger compose window
+-->
+
+<?xml-stylesheet href="chrome://enigmail/skin/enigmail.css"
+                 type="text/css"?>
+
+<!DOCTYPE window [
+<!ENTITY % enigmailDTD SYSTEM "chrome://enigmail/locale/enigmail.dtd" >
+%enigmailDTD;
+<!ENTITY % messengercomposeDTD SYSTEM "chrome://messenger/locale/messengercompose/messengercompose.dtd" >
+%messengercomposeDTD;
+]>
+
+<overlay id="enigMsgComposeOverlay"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <script type="application/x-javascript" src="chrome://enigmail/content/enigmailMsgComposeHelper.js"/>
+  <script type="application/x-javascript" src="chrome://enigmail/content/enigmailMsgComposeOverlay.js"/>
+
+ <commandset id="msgComposeCommandUpdate"
+              commandupdater="true"
+              events="focus"
+              oncommandupdate="Enigmail.msg.focusChange()"/>
+
+  <broadcasterset id="composeBroadcasters">
+    <broadcaster id="enigmail-bc-encrypt" checked="false"/>
+    <broadcaster id="enigmail-bc-sign" checked="false"/>
+    <broadcaster id="enigmail-bc-attach" checked="false"/>
+  </broadcasterset>
+
+  <popupset id="aTooltipSet"/>
+
+  <keyset id="tasksKeys">
+    <key id="key_enigEncrypt" key="&enigmail.encryptedsend.key;"
+         oncommand="Enigmail.msg.setFinalSendMode('toggle-final-encrypt')" modifiers="accel, shift"/>
+    <key id="key_enigSign" key="&enigmail.signedsend.key;"
+         oncommand="Enigmail.msg.setFinalSendMode('toggle-final-sign')" modifiers="accel, shift"/>
+  </keyset>
+
+<!-- menu for all apps -->
+
+  <menubar id="mail-menubar">
+
+      <menu id="menu_Enigmail"
+            label="&enigmail.label;"
+            accesskey="&enigmail.composemenu.accesskey;"
+            insertbefore="tasksMenu">
+
+        <menupopup id="menu_EnigmailPopup"
+                   onpopupshowing="EnigmailFuncs.collapseAdvanced(this, 'hidden', Enigmail.msg.setMenuSettings(''))">
+
+          <!-- encryption state / toggle menu -->
+          <menuitem id="enigmail_compose_encrypt_item"
+                accesskey="&enigmail.encryptedsend.accesskey;"
+                label="&enigmail.encryption.label;"
+                key="key_enigEncrypt"
+                savedraftslbl="&enigmail.autoEncryptDrafts.label;"
+                oncommand="Enigmail.msg.doPgpButton('toggle-final-encrypt');"/>
+
+          <!-- signing state / toggle menu -->
+          <menuitem id="enigmail_compose_sign_item"
+                accesskey="&enigmail.signedsend.accesskey;"
+                label="&enigmail.signing.label;"
+                key="key_enigSign"
+                oncommand="Enigmail.msg.doPgpButton('toggle-final-sign');"/>
+
+          <!-- PGP/MIME state / toggle menu -->
+          <menuseparator advanced="true"/>
+          <menuitem id="enigmail_compose_pgpmime_item"
+                advanced="true"
+                accesskey="&enigmail.sendPGPMime.accesskey;"
+                label="&enigmail.pgpMime.label;"
+                oncommand="Enigmail.msg.doPgpButton('toggle-final-mime');"/>
+
+          <menuseparator/>
+
+          <menuitem id="enigmail_trust_all_keys"
+              label="&enigmail.tempTrustAllKeys.label;"
+              accesskey="&enigmail.tempTrustAllKeys.accesskey;"
+              type="checkbox"
+              checked="false"
+              advanced="true"
+              oncommand="Enigmail.msg.tempTrustAllKeys();" />
+
+          <menuitem id="enigmail_undo_encryption"
+              label="&enigmail.undoencryption.label;"
+              accesskey="&enigmail.undoencryption.accesskey;"
+              oncommand="Enigmail.msg.undoEncryption();" />
+
+          <menuitem id="enigmail_insert_own_key"
+              label="&enigmail.attachmykey.label;"
+              accesskey="&enigmail.attachmykey.accesskey;"
+              type="checkbox"
+              checked="false"
+              oncommand="Enigmail.msg.toggleAttachOwnKey();" />
+
+          <menuitem id="enigmail_insert_key"
+              label="&enigmail.attachkey.label;"
+              accesskey="&enigmail.attachkey.accesskey;"
+              oncommand="Enigmail.msg.attachKey();" />
+
+          <menuseparator/>
+
+          <menuitem id="enigmail_clearPassphrase"
+              label="&enigmail.clearPassphrase.label;"
+              accesskey="&enigmail.clearPassphrase.accesskey;"
+              advanced="true"
+              oncommand="EnigmailCommon.clearPassphrase(window);" />
+
+          <menuitem id="enigmail_keymgmt"
+             label="&enigmail.keyManWindow.label;"
+             accesskey="&enigmail.keyManWindow.accesskey;"
+             oncommand="EnigmailFuncs.openKeyManager(window);" />
+
+          <menuitem id="enigmail_RulesEditor"
+              label="&enigmail.editRules.label;"
+              accesskey="&enigmail.editRules.accesskey;"
+              oncommand="EnigmailFuncs.openRulesEditor();"/>
+
+          <menuseparator/>
+
+          <menu id="enigmail_compose_options_menu"
+                label="&enigmail.prefs.label;"
+                accesskey="&enigmail.prefs.accesskey;">
+
+            <menupopup onpopupshowing="EnigmailFuncs.collapseAdvanced(this, 'hidden', Enigmail.msg.setMenuSettings(''))">
+
+              <menuitem id="enigmail_accountSettings"
+                label="&enigmail.pgpAccountSettings.label;"
+                accesskey="&enigmail.pgpAccountSettings.accesskey;"
+                oncommand="Enigmail.msg.goAccountManager();" />
+
+              <menuitem id="enigmail_defaultSendOpts"
+                label="&enigmail.sendOptionsMenu.label;"
+                accesskey="&enigmail.sendOptionsMenu.accesskey;"
+                oncommand="EnigmailFuncs.openPrefWindow(window, true, 'sendingTab');" />
+
+              <menuitem id="enigmail_defaultKeySelOpts"
+                label="&enigmail.defaultKeySelOpts.label;"
+                accesskey="&enigmail.defaultKeySelOpts.accesskey;"
+                advanced="true"
+                oncommand="EnigmailFuncs.openPrefWindow(window, true, 'keySelTab');" />
+
+            </menupopup>
+          </menu>
+
+          <menuitem id="enigmail_help"
+              label="&enigmail.help.label;"
+              accesskey="&enigmail.help.accesskey;"
+              oncommand="EnigmailFuncs.openHelpWindow('compose');" />
+
+        </menupopup>
+      </menu>
+
+  </menubar>
+
+  <!-- Enigmail toolbar button -->
+  <toolbarpalette id="MsgComposeToolbarPalette">
+    <toolbarbutton class="toolbarbutton-1"
+            id="button-enigmail-encrypt"
+            buttontype="thunderbird"
+            tooltip="aTooltipSet"
+            observes="enigmail-bc-encrypt"
+            oncommand="Enigmail.msg.doPgpButton('toggle-final-encrypt');"
+            label="&enigmail.encryptedsend.label;"/>
+
+    <toolbarbutton class="toolbarbutton-1"
+            id="button-enigmail-sign"
+            buttontype="thunderbird"
+            tooltip="aTooltipSet"
+            observes="enigmail-bc-sign"
+            oncommand="Enigmail.msg.doPgpButton('toggle-final-sign');"
+            label="&enigmail.signedsend.label;"/>
+
+    <toolbarbutton class="toolbarbutton-1"
+            id="button-enigmail-attach"
+            label="&enigmail.attachmykey.label;"
+            buttontype="thunderbird"
+            tooltip="aTooltipSet"
+            observes="enigmail-bc-attach"
+            oncommand="Enigmail.msg.toggleAttachOwnKey();"/>
+
+    <toolbarbutton class="toolbarbutton-1"
+            id="enigmail-toolbar-header-button"
+            label="&enigmail.composetoolbar.header;"
+            buttontype="thunderbird"
+            oncommand="Enigmail.msg.displaySecuritySettings()">
+      <label id="enigmail-toolbar-hdr-text" value="&enigmail.label;:"/>
+    </toolbarbutton>
+
+    <toolbarbutton class="toolbarbutton-1"
+            id="enigmail-toolbar-text-button"
+            label="&enigmail.composetoolbar.desc;"
+            buttontype="thunderbird"
+            oncommand="Enigmail.msg.displaySecuritySettings()">
+      <label id="enigmail-toolbar-text" value="&enigmail.composetoolbar.desc;"/>
+    </toolbarbutton>
+
+  </toolbarpalette>
+
+  <!-- Enigmail bar above text editor field -->
+
+  <toolbox id="compose-toolbox">
+    <toolbar id="enigmail-toolbar"
+            insertafter="composeToolbar2"
+            defaultset="enigmail-toolbar-header-button,button-enigmail-encrypt,button-enigmail-sign,button-enigmail-attach,enigmail-toolbar-text-button"
+            toolbarname="&enigmail.composetoolbar.label;"
+            customizable="true"
+            class="enigmailToolbar"
+            fullscreentoolbar="true"
+            mode="full"
+            context="toolbar-context-menu">
+    </toolbar>
+  </toolbox>
+
+</overlay>

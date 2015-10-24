@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!--
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public
+ * License Version 1.1 (the "MPL"); you may not use this file
+ * except in compliance with the MPL. You may obtain a copy of
+ * the MPL at http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the MPL is distributed on an "AS
+ * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ * implied. See the MPL for the specific language governing
+ * rights and limitations under the MPL.
+ *
+ * The Original Code is Enigmail.
+ *
+ * The Initial Developer of the Original Code is Patrick Brunschwig.
+ * Portions created by Patrick Brunschwig <patrick@enigmail.net> are
+ * Copyright (C) 2005 Patrick Brunschwig. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ * ***** END LICENSE BLOCK ***** *
+-->
+
+<?xml-stylesheet href="chrome://enigmail/skin/enigmail.css"
+                 type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://enigmail/locale/enigmail.dtd" >
+
+<overlay id="enigmail_IdentityEditOvl"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <vbox id="enigmail_IdentityEdit">
+    <checkbox id="enigmail_enablePgp"
+              prefstring="mail.identity.%identitykey%.enablePgp"
+              preftype="bool" prefattribute="value"
+              label="&enigmail.amPrefEnablePgp.label;"
+              oncommand="Enigmail.edit.toggleEnable();"/>
+    <vbox>
+      <groupbox id="enigmail_encryption.titleBox">
+        <radiogroup id="enigmail_pgpKeyMode" aria-labelledby="enablePgp">
+          <radio id="enigmail_keymode_useFromAddress"
+                 label="&enigmail.amPrefUseFromAddr.label;"
+                 value="0"
+                 observes="enigmail_bcEnablePgp"
+                 oncommand="Enigmail.edit.enableKeySel(false);"/>
+          <vbox>
+            <radio id="enigmail_keymode_usePgpkeyId"
+                   label="&enigmail.amPrefUseKeyId.label;"
+                   observes="enigmail_bcEnablePgp"
+                   value="1"
+                   oncommand="Enigmail.edit.enableKeySel(true);"/>
+            <hbox>
+              <textbox id="enigmail_identity.pgpkeyId" aria-labelledby="keymode_usePgpkeyId"
+                       prefstring="mail.identity.%identitykey%.pgpkeyId"
+                       observes="enigmail_bcUseKeyId"
+                       readonly="true"
+                       preftype="wstring" prefattribute="value"/>
+              <button id="enigmail_selectPgpKey" label="&enigmail.amPrefSelectKey.label;"
+                      observes="enigmail_bcUseKeyId"
+                      oncommand="Enigmail.edit.selectKeyId()"/>
+            </hbox>
+          </vbox>
+        </radiogroup>
+
+        <groupbox>
+          <caption label="&enigmail.amPrefDefaultEncrypt.label;"/>
+
+          <checkbox id="enigmail_encrypt_ifPossible"
+                    checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.defaultEncryption.label;"/>
+          <checkbox id="enigmail_sign_ifPossible"
+                    checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.defaultSigning.label;"/>
+          <checkbox id="enigmail_pgpMimeMode"
+                    checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.usePGPMimeAlways.label;"/>
+
+          <separator/>
+
+          <label value="&enigmail.afterDefaultsAndRules.label;"/>
+          <checkbox id="enigmail_sign_notEncrypted"
+                    checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.finallySignNotEncrypted.label;"/>
+          <checkbox id="enigmail_sign_encrypted"
+                    checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.finallySignEncrypted.label;"/>
+
+          <separator/>
+
+          <checkbox id="enigmail_autoEncryptDrafts" checked="false"
+                    observes="enigmail_bcEnablePgp"
+                    label="&enigmail.autoEncryptDrafts.label;"/>
+
+        </groupbox>
+
+        <hbox autostretch="never" id="enigmail_PrefsBox">
+          <spacer flex="1"/>
+          <button class="dialog"
+                  id="enigmail_advancedAccountPrefsButton"
+                  observes="enigmail_bcEnablePgp"
+                  advanced="true"
+                  label="&enigmail.advancedPrefsButton.label;"
+                  oncommand="Enigmail.edit.advancedIdentitySettings()"/>
+          <button class="dialog"
+                  id="enigmail_openpgpPrefsButton"
+                  observes="enigmail_bcEnablePgp"
+                  label="&enigmail.openpgpPrefsButton.label;"
+                  oncommand="EnigmailFuncs.openPrefWindow(window, true, 'sendingTab');"/>
+        </hbox>
+      </groupbox>
+    </vbox>
+  </vbox>
+</overlay>

@@ -1,0 +1,279 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public
+ * License Version 1.1 (the "MPL"); you may not use this file
+ * except in compliance with the MPL. You may obtain a copy of
+ * the MPL at http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the MPL is distributed on an "AS
+ * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ * implied. See the MPL for the specific language governing
+ * rights and limitations under the MPL.
+ *
+ * The Original Code is Enigmail.
+ *
+ * The Initial Developer of the Original Code is Ramalingam Saravanan.
+ * Portions created by Ramalingam Saravanan <svn@xmlterm.org> are
+ * Copyright (C) 2001 Ramalingam Saravanan. All Rights Reserved.
+ *
+ * Contributor(s):
+ * Patrick Brunschwig <patrick@enigmail.net>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ * ***** END LICENSE BLOCK ***** */
+
+#include "nsISupports.idl"
+
+interface nsIDOMWindow;
+interface nsIDOMDocument;
+interface nsIPrefBranch;
+interface nsIFileOutputStream;
+interface nsIFile;
+
+/**
+ * The nsIEnigmail provides an openPGP-based encryption/decryption service
+ */
+[scriptable, uuid(847b3a00-7ab1-11d4-8f02-006008948af5)]
+interface nsIEnigmail : nsISupports
+{
+  readonly attribute string agentType;        /* always "gpg" */
+  readonly attribute string agentVersion;     /* version string */
+
+  readonly attribute nsIFile agentPath;        /* executable path for gpg */
+  readonly attribute nsIFile gpgconfPath;      /* executable path for gpgconf */
+  readonly attribute nsIFile connGpgAgentPath; /* executable path for connect-gpg-agent */
+
+  readonly attribute boolean initialized;
+  attribute boolean initializationAttempted;
+  readonly attribute string initializationError;
+
+  void initialize(in nsIDOMWindow domWindow, in string version,
+                  in nsIPrefBranch enigmailPrefs);
+  void reinitialize();
+  void finalize();
+  boolean useGpgAgent();     /* is gpg-agent used */
+
+
+  string locateArmoredBlock(in string text,
+                            in long offset,
+                            in string indentStr,
+                            out long beginIndex,
+                            out long endIndex,
+                            out string foundIndentStr);
+
+  /* Cleartext signature parts */
+  const long SIGNATURE_TEXT    = 1;
+  const long SIGNATURE_HEADERS = 2;
+  const long SIGNATURE_ARMOR   = 3;
+
+  string extractSignaturePart(in string signatureBlock,
+                              in long part);
+
+  /* User interaction flags */
+  const long UI_INTERACTIVE           = 0x01;
+  const long UI_ALLOW_KEY_IMPORT      = 0x02;
+  const long UI_UNVERIFIED_ENC_OK     = 0x04;
+  const long UI_PGP_MIME              = 0x08;
+  const long UI_TEST                  = 0x10;
+  const long UI_RESTORE_STRICTLY_MIME = 0x20;
+
+  /* Send message flags */
+  const long SEND_SIGNED           = 0x001;  //    1
+  const long SEND_ENCRYPTED        = 0x002;  //    2
+  const long SEND_DEFAULT          = 0x004;  //    4
+  const long SEND_LATER            = 0x008;  //    8
+  const long SEND_WITH_CHECK       = 0x010;  //   16
+  const long SEND_ALWAYS_TRUST     = 0x020;  //   32
+  const long SEND_ENCRYPT_TO_SELF  = 0x040;  //   64
+  const long SEND_PGP_MIME         = 0x080;  //  128
+  const long SEND_TEST             = 0x100;  //  256
+  const long SAVE_MESSAGE          = 0x200;  //  512
+  const long SEND_STRIP_WHITESPACE = 0x400;  // 1024
+  const long SEND_ATTACHMENT       = 0x800;  // 2048
+
+  wstring encryptMessage(in nsIDOMWindow parent,
+                        in unsigned long uiFlags,
+                        in string  plainText,
+                        in string  fromMailAddr,
+                        in string  toMailAddr,
+                        in string  bccMailAddr,
+                        in unsigned long sendFlags,
+                        out long exitCode,
+                        out unsigned long statusFlags,
+                        out wstring errorMsg);
+
+  /* Status flags */
+  const unsigned long GOOD_SIGNATURE        = 0x00000001;
+  const unsigned long BAD_SIGNATURE         = 0x00000002;
+  const unsigned long UNVERIFIED_SIGNATURE  = 0x00000004;
+  const unsigned long EXPIRED_SIGNATURE     = 0x00000008;
+  const unsigned long EXPIRED_KEY_SIGNATURE = 0x00000010;
+  const unsigned long EXPIRED_KEY           = 0x00000020;
+  const unsigned long REVOKED_KEY           = 0x00000040;
+  const unsigned long NO_PUBKEY             = 0x00000080;
+  const unsigned long NO_SECKEY             = 0x00000100;
+  const unsigned long IMPORTED_KEY          = 0x00000200;
+  const unsigned long INVALID_RECIPIENT     = 0x00000400;
+  const unsigned long MISSING_PASSPHRASE    = 0x00000800;
+  const unsigned long BAD_PASSPHRASE        = 0x00001000;
+  const unsigned long BAD_ARMOR             = 0x00002000;
+  const unsigned long NODATA                = 0x00004000;
+  const unsigned long DECRYPTION_INCOMPLETE = 0x00008000;
+  const unsigned long DECRYPTION_FAILED     = 0x00010000;
+  const unsigned long DECRYPTION_OKAY       = 0x00020000;
+  const unsigned long UNTRUSTED_IDENTITY    = 0x00040000;
+  const unsigned long TRUSTED_IDENTITY      = 0x00080000;
+  const unsigned long PGP_MIME_SIGNED       = 0x00100000;
+  const unsigned long PGP_MIME_ENCRYPTED    = 0x00200000;
+  const unsigned long DISPLAY_MESSAGE       = 0x00400000;
+  const unsigned long INLINE_KEY            = 0x00800000;
+  const unsigned long PARTIALLY_PGP         = 0x01000000;
+  const unsigned long PHOTO_AVAILABLE       = 0x02000000;
+  const unsigned long OVERFLOWED            = 0x04000000;
+  const unsigned long CARDCTRL              = 0x08000000;
+  const unsigned long SC_OP_FAILURE         = 0x10000000;
+  const unsigned long UNKNOWN_ALGO          = 0x20000000;
+  const unsigned long SIG_CREATED           = 0x40000000;
+  const unsigned long END_ENCRYPTION        = 0x80000000;
+
+  wstring decryptMessage(in nsIDOMWindow parent,
+                        in unsigned long uiFlags,
+                        in string  cipherText,
+                        inout string signature,
+                        out long exitCode,
+                        out unsigned long statusFlags,
+                        out wstring keyId,
+                        out wstring userId,
+                        out wstring sigDetails,
+                        out wstring errorMsg,
+                        out wstring blockSeparation,
+                        out wstring encToDetails);
+
+  boolean deleteMessageURI(in string uri);
+
+  string getGnupgConfig (out long exitCodeObj, out wstring errorMsgObj);
+
+/*** key handling functions ***/
+
+  string getKeySig (in string keyId,
+                    out long exitCode,
+                    out wstring errorMsg);
+
+  string getKeyDetails (in string keyId,
+                        in boolean uidOnly,
+                        in boolean withUserAttr);
+
+  string showKeyPhoto (in string keyId,
+                       in long photoNumber,
+                       out long exitCode,
+                       out wstring errorMsg);
+
+  const long EXTRACT_SECRET_KEY = 0x01;
+
+  string extractKey(in nsIDOMWindow parent,
+                    in unsigned long exportFlags,
+                    in string userId,
+                    in nsIFile outputFile,
+                    out long   exitCode,
+                    out wstring errorMsg);
+
+  long importKey(in nsIDOMWindow parent,
+                 in unsigned long uiFlags,
+                 in string msgText,
+                 in string keyId,
+                 out wstring errorMsg);
+
+  long importKeyFromFile(in nsIDOMWindow parent,
+                 in nsIFile inputFile,
+                 out string errorMsg,
+                 out wstring importedKeys);
+
+  string getFirstUserIdOfKey(in string keyId);
+
+  string getPubKeyIdForSubkey(in string keyId);
+
+  /* Keyserver Action Flags */
+  const long SEARCH_KEY       = 0x01;
+  const long DOWNLOAD_KEY     = 0x02;
+  const long UPLOAD_KEY       = 0x04;
+  const long REFRESH_KEY      = 0x08;
+
+  string createMessageURI(in string originalUrl,
+                          in string contentType,
+                          in string contentCharset,
+                          in string contentData,
+                          in boolean persist);
+
+  /* manage GPG key list cache */
+
+  string getUserIdList (in boolean secretOnly,
+                        in boolean refresh,
+                        out long exitCode,
+                        out unsigned long statusFlags,
+                        out wstring errorMsg);
+
+  void invalidateUserIdList();
+
+
+  /* attachment handling */
+
+  string encryptAttachment (in nsIDOMWindow parent,
+                            in string fromMailAddr,
+                            in string toMailAddr,
+                            in string bccMailAddr,
+                            in unsigned long sendFlags,
+                            in nsIFile inFile,
+                            in nsIFile outFile,
+                            out long exitCode,
+                            out unsigned long statusFlags,
+                            out wstring errorMsg);
+
+  boolean decryptAttachment (in nsIDOMWindow parent,
+                             in nsIFile outFile,
+                             in string displayName,
+                             in wstring byteData,
+                             out long exitCode,
+                             out unsigned long statusFlags,
+                             out wstring errorMsg);
+
+  long verifyAttachment (in nsIDOMWindow parent,
+                         in nsIFile verifyFile,
+                         in nsIFile sigFile,
+                         out unsigned long statusFlags,
+                         out wstring errorMsg);
+
+  /* per-recipient rules */
+
+  boolean getRulesData(out nsIDOMDocument rulesList);
+
+  void addRule(in boolean appendToEnd,
+               in string toAddress,
+               in string keyList,
+               in long sign,
+               in long encrypt,
+               in long pgpMime,
+               in long flags);
+
+  boolean saveRulesFile();
+  void clearRules();
+
+  /* smartcard functions */
+  string getCardStatus (out long exitCode,
+                        out wstring errorMsg);
+
+  const long CARD_PIN_CHANGE       = 1;
+  const long CARD_PIN_UNBLOCK      = 2;
+  const long CARD_ADMIN_PIN_CHANGE = 3;
+
+};
