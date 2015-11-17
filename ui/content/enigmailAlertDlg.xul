@@ -63,7 +63,7 @@
              readonly="true"
              class="plain"
              minwidth="400px"
-             maxwidth="750px"
+             maxwidth="780px"
              value=""/>
   </vbox>
 
@@ -88,16 +88,16 @@
       var button3=window.arguments[0].button3;
       var checkboxLabel=window.arguments[0].checkboxLabel;
       var m=msgtext.match(/(\n)/g);
-      var lines = 2;
+      var lines = 3;
       if (m == null) {
-        lines = (msgtext.length / 80) + 2; 
+        lines = (msgtext.length / 80) + 4; 
       }
       else {
         try {
-          var lines = (m.length > 20 ? 20 : m.length+2);
+          var lines = (m.length > 20 ? 20 : m.length+2)+2;
         }
         catch (ex) {
-          lines = 2;
+          lines = 3;
         }
       }
       if (button1) {

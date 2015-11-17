@@ -65,6 +65,7 @@ var gShowOthersKeys = null;
 var freunde = 500;
 var minuten = 4;
 var started = false;
+var gKeyImportedAlert = true;
 
 function enigmailKeyManagerLoad() {
   DEBUG_LOG("enigmailKeyManager.js: enigmailKeyManagerLoad\n");
@@ -921,9 +922,8 @@ function importKeyFilee(inFile){
     EnigAlert(EnigGetString("importKeysFailed")+"\n\n"+errorMsgObj.value);
   }
   else {
-    EnigLongAlert(EnigGetString("successKeyImport")+"\n\n"+errorMsgObj.value);
+    //EnigLongAlert(EnigGetString("successKeyImport")+"\n\n"+errorMsgObj.value);
   }
-  enigmailRefreshKeys();
 }
 
 
@@ -1550,13 +1550,13 @@ function checkDone(freunde){
       entries = file.directoryEntries;
 
       if(entries.hasMoreElements()){
-        EnigAlert("Keys heruntergeladen!"); 
+        //EnigAlert("Keys heruntergeladen!"); 
         getAllFilesFromFolder("/home/.enigmail/key/");
       }
       else
       {
-        var minuten = freunde/120;
-        EnigLongAlert("Das Herunterladen aller von Freunden verfügbaren PublicKeys aus Facebook kann mehrere Minuten dauern (bei "+freunde+" ca. "+minuten+" Minuten). Bitte haben Sie einen Augenblick Geduld. Nach Pressen des OK-Buttons, wird der Status erneut überprüft.");
+        var minuten = Math.floor(freunde/120);
+        EnigLongAlert("Das Herunterladen aller von Freunden verfügbaren öffentlichen Schlüssel aus Facebook kann mehrere Minuten dauern (bei "+freunde+" ca. "+minuten+" Minuten). Bitte haben Sie einen Augenblick Geduld.\n\nNach Pressen des OK-Buttons, wird der Status erneut überprüft.");
         checkDone(freunde);
       }
   }
@@ -1605,12 +1605,12 @@ function startScript(pass, email){
     }
     cstream.close(); // this closes fstream
     freunde = data;
-    minuten = freunde/120;
+    minuten = Math.floor(freunde/120);
   }
-  EnigLongAlert("Das Herunterladen aller von Freunden verfügbaren PublicKeys aus Facebook kann mehrere Minuten dauern (bei "+freunde+" ca. "+minuten+" Minuten). Bitte haben Sie einen Augenblick Geduld. Nach Pressen des OK-Buttons, wird der Status erneut überprüft.");
-
+  EnigLongAlert("Das Herunterladen aller von Freunden verfügbaren öffentlichen Schlüssel aus Facebook kann mehrere Minuten dauern (bei "+freunde+" ca. "+minuten+" Minuten). Bitte haben Sie einen Augenblick Geduld.\n\nNach Pressen des OK-Buttons, wird der Status erneut überprüft.");
+        
 //EnigAlert("Das Herunterladen aller von Freunden verfügbaren PublicKeys aus Facebook kann mehrere Minuten dauern. Bitte haben Sie einen Augenblick Geduld. Nach Pressen des OK-Buttons, wird der Status erneut überprüft.");   
-  x++;
+  x++; 
 }
 return freunde;
 }
@@ -1627,4 +1627,5 @@ function getAllFilesFromFolder(dir) {
       entry.QueryInterface(Components.interfaces.nsIFile);
       importKeyFilee(entry);
     }
+  enigmailRefreshKeys();
 }
